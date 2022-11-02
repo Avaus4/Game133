@@ -29,13 +29,11 @@ abstract class GameObject extends Group implements Updatable {
     protected Rotate myRotation;
     protected Scale myScale;
 
-    void add(Node node){this.getChildren().add(node);}
-
-    public GameObject(){
+    public GameObject() {
         myTranslation = new Translate();
         myRotation = new Rotate();
         myScale = new Scale();
-        this.getTransforms().addAll(myTranslation,myRotation,myScale);
+        this.getTransforms().addAll(myRotation, myTranslation,  myScale);
     }
 
     public void rotate(double degrees) {
@@ -46,13 +44,25 @@ abstract class GameObject extends Group implements Updatable {
         myScale.setX(sx);
         myScale.setY(sy);
     }
-    public double getMyRotation(){
+
+    public void translate(double tx, double ty) {
+        myTranslation.setX(tx + myTranslation.getX());
+        myTranslation.setY(ty + myTranslation.getY());
+    }
+
+    public double getMyRotation() {
         return myRotation.getAngle();
     }
 
-    public void translate(double tx, double ty) {
-        myTranslation.setX(tx);
-        myTranslation.setY(ty);
+    void add(Node node) {
+        this.getChildren().add(node);
+    }
+
+    public void update() {
+        for (Node n : getChildren()) {
+            if (n instanceof Updatable)
+                ((Updatable) n).update();
+        }
     }
 }
 
@@ -112,7 +122,6 @@ class Helipad extends GameObject {
         add(circ);
     }
 
-
     @Override
     public void update() {
 
@@ -122,61 +131,82 @@ class Helipad extends GameObject {
 
 class Helicopter extends GameObject{
 
-    double velocity = 3;
-    int rotN = 15;
+    double velocity = 0;
+    double vy;
+    double vx;
 
     public Helicopter() {
         Rectangle rect = new Rectangle(5, 40);
         rect.setStroke(Color.LIMEGREEN);
-        rect.setTranslateX(198);
-        rect.setTranslateY(50);
         rect.setFill(Color.LIGHTSLATEGRAY);
         add(rect);
-
         Circle circ = new Circle(20);
         circ.setStroke(Color.LIMEGREEN);
-        circ.setTranslateX(200);
-        circ.setTranslateY(50);
         add(circ);
     }
 
     @Override
     public void update() {
-        Rotate rot = new Rotate();
-        rot.setPivotY(getTranslateY());
-        rot.setPivotX(getTranslateX());
-        getTransforms().add(rot);
+        if(myRotation.getAngle() !=  0) {
+            myTranslation.setX(myTranslation.getX() + vx);
+        }
+        myTranslation.setY(myTranslation.getY() + vy);
+        pivot();
+    }
+
+    public void moveLeft(){
+        myRotation.setAngle(getMyRotation());
+        double deg = getMyRotation();
+        vx = velocity * Math.sin(Math.toRadians(deg) * -1);
+        vy = velocity * Math.cos(Math.toRadians(deg));
+    }
+
+    public void moveRight(){
+        myRotation.setAngle(getMyRotation());
+        double deg = getMyRotation();
+        vx = velocity * Math.sin(Math.toRadians(deg) * -1);
+        vy = velocity * Math.cos(Math.toRadians(deg));
+    }
+
+    public void pivot(){
+        myRotation.setPivotY(myTranslation.getY());
+        myRotation.setPivotX(myTranslation.getX());
     }
 }
 
 class Game {
 
     public Game(Pane root, Helicopter heli, Set<KeyCode> keysDown) {
-        Helipad hp = new Helipad();
+        //Helipad hp = new Helipad();
+
         AnimationTimer loop = new AnimationTimer() {
             @Override
             public void handle(long now) {
-
-                if (keysDown.contains(KeyCode.W))
-                    heli.setTranslateY(heli.getTranslateY() + heli.velocity);
+                heli.update();
+                heli.rotate(heli.getMyRotation());
+                if (keysDown.contains(KeyCode.W)){
+                    heli.velocity+= .1; //TODO make sure this doesnt backfire
+                }
                 if (keysDown.contains(KeyCode.S))
                     heli.setTranslateY(heli.getTranslateY() - heli.velocity);
                 if (keysDown.contains(KeyCode.A)) {
-                    heli.setRotate(heli.rotN);
-                    //heli.rotN += 15;
-                    heli.rotate(heli.getMyRotation()+1);
-                    System.out.println(heli.getMyRotation());
+                    heli.rotate(heli.getMyRotation() + 15);
+                    heli.moveLeft();
+                    System.out.println(heli.vy); //TEST case
                 }
-                if (keysDown.contains(KeyCode.D))
-                    heli.setRotate(heli.getRotate() - heli.velocity);
-
-
+                if (keysDown.contains(KeyCode.D)) {
+                    heli.rotate(heli.getMyRotation() - 15);
+                    heli.moveRight();
+                }
+                if(keysDown.contains(KeyCode.I)){
+                    //ignition of helicopter
+                }
                 // System.out.println(keysDown);
             }
         };
         loop.start();
 
-        root.getChildren().addAll(hp, heli);
+//        root.getChildren().addAll(hp, heli);
     }
 }
 
@@ -191,7 +221,12 @@ public class GameApp extends Application {
         Pane root = new Pane();
         root.setScaleY(-1);
         Helicopter heli = new Helicopter();
+        Helipad hp = new Helipad();
+        root.getChildren().addAll(hp, heli);
+        heli.translate(200, 50);
+        heli.pivot();
         PondAndCloud pc = new PondAndCloud(root);
+
 
 
         // show the initial Scene for your application
