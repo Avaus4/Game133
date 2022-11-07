@@ -9,6 +9,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
@@ -67,18 +69,43 @@ abstract class GameObject extends Group implements Updatable {
 }
 
 
-class GameText {
+class GameText extends GameObject{
+    Text text;
+    public GameText(String textString){
+        text = new Text(textString);
+        text.setScaleY(-1);
+        text.setFont(Font.font(12));
+        text.setFill(Color.HONEYDEW);
+        add(text);
+    }
+    public GameText(){
+        this("");
+    }
+    public void setText(String textString){
+        text.setText(textString);
+    }
+    public void setTextLoc(Helicopter object){
+        this.myTranslation = object.myTranslation;
+        this.myRotation = object.myRotation;
+    }
 
 }
 
-class Pond {
+class Pond  {
     Random rand = new Random();
     Circle pond;
+    GameText text;
+    int size = 20;
     public Pond(){
+
         pond = new Circle(20);
         pond.setTranslateY(rand.nextInt(230) + 530);
         pond.setTranslateX(rand.nextInt(290) + 10);
         pond.setFill(Color.LIGHTSKYBLUE);
+        text = new GameText(String.valueOf(size) + "%");
+        text.setTranslateY(pond.getTranslateY());
+        text.setTranslateX(pond.getTranslateX());
+
     }
 
 }
@@ -134,7 +161,9 @@ class Helicopter extends GameObject{
     double velocity = 0;
     double vy;
     double vx;
-
+    boolean ignition;
+    GameText text;
+    int fuel = 1000;
     public Helicopter() {
         Rectangle rect = new Rectangle(5, 40);
         rect.setStroke(Color.LIMEGREEN);
@@ -143,16 +172,39 @@ class Helicopter extends GameObject{
         Circle circ = new Circle(20);
         circ.setStroke(Color.LIMEGREEN);
         add(circ);
+        text = new GameText(String.valueOf(fuel));
+        text.setTranslateY(0);
+        text.setTranslateX(0);
+        add(text);
+        text.setTextLoc(this);
     }
+
+    public void throttle(Boolean b){
+        if(ignition){
+            if(b){
+                if(velocity < 10)
+                    velocity+=.1;
+            }
+            else{
+                if(velocity > -10)
+                    velocity+= -.2;
+            }
+        }
+    }
+
 
     @Override
     public void update() {
         if(myRotation.getAngle() !=  0) {
             myTranslation.setX(myTranslation.getX() + vx);
+            myTranslation.setY(myTranslation.getY() + vy);
         }
-        myTranslation.setY(myTranslation.getY() + vy);
+        else {
+            myTranslation.setY(myTranslation.getY() + velocity);
+        }
         pivot();
     }
+
 
     public void moveLeft(){
         myRotation.setAngle(getMyRotation());
@@ -185,39 +237,36 @@ class Game {
                 heli.update();
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.W)){
-                    heli.velocity+= .1; //TODO make sure this doesnt backfire
+                   heli.throttle(true);
                 }
-                if (keysDown.contains(KeyCode.S))
-                    heli.setTranslateY(heli.getTranslateY() - heli.velocity);
+                if (keysDown.contains(KeyCode.S)){
+                    heli.throttle(false);
+                }
                 if (keysDown.contains(KeyCode.A)) {
                     heli.rotate(heli.getMyRotation() + 15);
                     heli.moveLeft();
-                    System.out.println(heli.vy); //TEST case
                 }
                 if (keysDown.contains(KeyCode.D)) {
                     heli.rotate(heli.getMyRotation() - 15);
                     heli.moveRight();
                 }
                 if(keysDown.contains(KeyCode.I)){
-                    //ignition of helicopter
+                   heli.ignition = true;
                 }
-                // System.out.println(keysDown);
+                //System.out.println(keysDown); //TODO test case
             }
         };
         loop.start();
-
-//        root.getChildren().addAll(hp, heli);
     }
 }
 
 public class GameApp extends Application {
     private static final int GAME_WIDTH = 400;
 
-    private static final int GAME_HEIGHT = 800;
+    private static final int GAME_HEIGHT = 800;//TODO set back to 800
 
     @Override
     public void start(Stage primaryStage) {
-        // Create group as root for all nodes in the scene graph
         Pane root = new Pane();
         root.setScaleY(-1);
         Helicopter heli = new Helicopter();
@@ -250,7 +299,6 @@ public class GameApp extends Application {
                 keysdown.add(event.getCode());
             }
         });
-
         scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent event) {
                 keysdown.remove(event.getCode());
