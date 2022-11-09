@@ -17,7 +17,6 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -32,6 +31,7 @@ abstract class GameObject extends Group implements Updatable {
     protected Scale myScale;
 
     public GameObject() {
+        this.setManaged(false);
         myTranslation = new Translate();
         myRotation = new Rotate();
         myScale = new Scale();
@@ -74,8 +74,8 @@ class GameText extends GameObject{
     public GameText(String textString){
         text = new Text(textString);
         text.setScaleY(-1);
-        text.setFont(Font.font(12));
-        text.setFill(Color.HONEYDEW);
+        text.setFont(Font.font(16));
+        text.setFill(Color.MEDIUMSLATEBLUE);
         add(text);
     }
     public GameText(){
@@ -84,14 +84,14 @@ class GameText extends GameObject{
     public void setText(String textString){
         text.setText(textString);
     }
-    public void setTextLoc(Helicopter object){
+    public void setTextLoc(GameObject object){
         this.myTranslation = object.myTranslation;
         this.myRotation = object.myRotation;
     }
 
 }
 
-class Pond  {
+class Pond extends GameObject {
     Random rand = new Random();
     Circle pond;
     GameText text;
@@ -99,38 +99,37 @@ class Pond  {
     public Pond(){
 
         pond = new Circle(20);
-        pond.setTranslateY(rand.nextInt(230) + 530);
-        pond.setTranslateX(rand.nextInt(290) + 10);
         pond.setFill(Color.LIGHTSKYBLUE);
-        text = new GameText(String.valueOf(size) + "%");
-        text.setTranslateY(pond.getTranslateY());
-        text.setTranslateX(pond.getTranslateX());
+        add(pond);
+        translate(rand.nextInt(rand.nextInt(250) + 100),
+                (rand.nextInt(350) + 200));
 
+        text = new GameText(String.valueOf(size));
+        add(text);
     }
 
 }
 
-class Cloud{
+class Cloud extends GameObject{
     Random rand = new Random();
     Circle cloud;
+    double size = 30;
+    int r;
+    GameText text;
     public Cloud(){
-        cloud = new Circle(rand.nextInt(20)+30);
-        cloud.setTranslateY(rand.nextInt(230) + 530);
-        cloud.setTranslateX(rand.nextInt(290) + 10);
+        r = rand.nextInt(20)+30;
+        cloud = new Circle(r);
         cloud.setFill(Color.WHITE);
+        add(cloud);
+        translate(rand.nextInt(rand.nextInt(250) + 100),
+                (rand.nextInt(350) + 200));
+
+        text = new GameText(String.valueOf(size));
+        //lock
+        add(text);
     }
 
-}
-
-class PondAndCloud {
-
-    public PondAndCloud(Pane root){
-        Pond pond = new Pond();
-        Cloud cloud = new Cloud();
-
-        root.getChildren().addAll(pond.pond, cloud.cloud);
-    }
-
+    public int getRadius() { return r;}
 }
 
 class Helipad extends GameObject {
@@ -162,6 +161,7 @@ class Helicopter extends GameObject{
     double vy;
     double vx;
     boolean ignition;
+    boolean shoot;
     GameText text;
     int fuel = 1000;
     public Helicopter() {
@@ -173,8 +173,8 @@ class Helicopter extends GameObject{
         circ.setStroke(Color.LIMEGREEN);
         add(circ);
         text = new GameText(String.valueOf(fuel));
-        text.setTranslateY(0);
-        text.setTranslateX(0);
+        text.myTranslation.setX(0);
+        text.myTranslation.setY(0);
         add(text);
         text.setTextLoc(this);
     }
@@ -205,7 +205,6 @@ class Helicopter extends GameObject{
         pivot();
     }
 
-
     public void moveLeft(){
         myRotation.setAngle(getMyRotation());
         double deg = getMyRotation();
@@ -226,14 +225,42 @@ class Helicopter extends GameObject{
     }
 }
 
-class Game {
+class Game{
+    double old = -1;
+    double elapsedTime = 0;
+    double ft;
+    double conv_to_sec = 1e9;
+    int frameCount_avg = 30;
+    int frameCount = 0;
+
+    public void Collision(Helicopter heli, Cloud cloud, Pond pond){
+        if(heli.myTranslation.getX()
+                > (cloud.myTranslation.getX() - cloud.getRadius())
+                && heli.myTranslation.getX() <
+                (cloud.myTranslation.getX() + cloud.getRadius())
+                && heli.myTranslation.getY() <
+                (cloud.myTranslation.getY() + cloud.getRadius())
+                && heli.myTranslation.getY() >
+                (cloud.myTranslation.getY() - cloud.getRadius())
+        ){
+            System.out.println("COLLISION");
+
+            if(heli.shoot){
+                pond.scale(pond.getScaleX() + 10, pond.getScaleY() + 10);  //TODO fix scaling
+                System.out.println("PEW PEW PEW");
+                System.out.println(pond.getScaleX());
+            }
+
+        }
+    }
+
 
     public Game(Pane root, Helicopter heli, Set<KeyCode> keysDown) {
-        //Helipad hp = new Helipad();
 
         AnimationTimer loop = new AnimationTimer() {
             @Override
-            public void handle(long now) {
+            public void handle(long nano) {
+
                 heli.update();
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.W)){
@@ -246,15 +273,38 @@ class Game {
                     heli.rotate(heli.getMyRotation() + 15);
                     heli.moveLeft();
                 }
-                if (keysDown.contains(KeyCode.D)) {
+                if(keysDown.contains(KeyCode.D)) {
                     heli.rotate(heli.getMyRotation() - 15);
                     heli.moveRight();
                 }
                 if(keysDown.contains(KeyCode.I)){
                    heli.ignition = true;
                 }
-                //System.out.println(keysDown); //TODO test case
+                if(keysDown.contains(KeyCode.SPACE)){
+                    heli.shoot = true;
+                    Collision(heli, (Cloud) root.getChildren().get(2),
+                            (Pond) root.getChildren().get(1));
+                }
+                //System.out.println(keysDown); // FOR TEST PURPOSES
+
+                if (old < 0) old = nano;
+                double delta = (nano - old) / conv_to_sec;
+
+                old = nano;
+                elapsedTime += delta;
+                double fps = (1 / delta);
+
+                if (frameCount % frameCount_avg == 0) { //TODO need to revisit when throttle leads to more fuel usage
+                   if(heli.ignition == true){
+                       heli.fuel -= 1;
+                       heli.text.setText(String.valueOf(heli.fuel));
+                   }
+
+                }
+
+                frameCount++;
             }
+
         };
         loop.start();
     }
@@ -271,10 +321,11 @@ public class GameApp extends Application {
         root.setScaleY(-1);
         Helicopter heli = new Helicopter();
         Helipad hp = new Helipad();
-        root.getChildren().addAll(hp, heli);
+        Pond pond = new Pond();
+        Cloud cloud = new Cloud();
+        root.getChildren().addAll(hp, pond, cloud, heli);
         heli.translate(200, 50);
         heli.pivot();
-        PondAndCloud pc = new PondAndCloud(root);
 
 
 
@@ -282,7 +333,7 @@ public class GameApp extends Application {
         Scene scene = new Scene(root, GAME_WIDTH, GAME_HEIGHT, Color.BLACK);
 
         // set the title of the Stage
-        primaryStage.setTitle("GAME_WINDOW_TITLE");
+        primaryStage.setTitle("Rain Maker");
 
         // add the scene to the Stage
         primaryStage.setScene(scene);
@@ -294,6 +345,7 @@ public class GameApp extends Application {
         primaryStage.show();
 
         Set<KeyCode> keysdown = new HashSet<>();
+
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent event) {
                 keysdown.add(event.getCode());
@@ -307,7 +359,7 @@ public class GameApp extends Application {
 
         Game game = new Game(root, heli, keysdown);
 
-    } // end of start()
+    }
 
     public static void main(String[] args) {
         Application.launch();
