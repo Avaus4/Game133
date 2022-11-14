@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.TriangleMesh;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
@@ -75,7 +76,7 @@ class GameText extends GameObject{
         text = new Text(textString);
         text.setScaleY(-1);
         text.setFont(Font.font(16));
-        text.setFill(Color.MEDIUMSLATEBLUE);
+        text.setFill(Color.FIREBRICK);
         add(text);
     }
     public GameText(){
@@ -98,7 +99,7 @@ class Pond extends GameObject {
     int size = 20;
     public Pond(){
 
-        pond = new Circle(20);
+        pond = new Circle(size);
         pond.setFill(Color.LIGHTSKYBLUE);
         add(pond);
         translate(rand.nextInt(rand.nextInt(250) + 100),
@@ -165,6 +166,7 @@ class Helicopter extends GameObject{
     GameText text;
     int fuel = 1000;
     public Helicopter() {
+        /* A1
         Rectangle rect = new Rectangle(5, 40);
         rect.setStroke(Color.LIMEGREEN);
         rect.setFill(Color.LIGHTSLATEGRAY);
@@ -172,6 +174,80 @@ class Helicopter extends GameObject{
         Circle circ = new Circle(20);
         circ.setStroke(Color.LIMEGREEN);
         add(circ);
+         */
+
+        Circle body = new Circle(10);
+        body.setScaleY(2);
+        body.setTranslateY(10);
+        body.setFill(Color.PERU);
+        add(body);
+
+        Circle window = new Circle(8);
+        window.setScaleY(2);
+        window.setTranslateY(14);
+        window.setFill(Color.SKYBLUE);
+        add(window);
+
+        Rectangle cutOff = new Rectangle(16, 20);
+        cutOff.setTranslateY(-4);
+        cutOff.setTranslateX(-8);
+        cutOff.setFill(Color.PERU);
+        add(cutOff);
+
+        Rectangle leftSkid = new Rectangle(5, 40);
+        leftSkid.setTranslateX(-20);
+        leftSkid.setTranslateY(-12);
+        leftSkid.setFill(Color.PERU);
+        add(leftSkid);
+
+        Rectangle rightSkid = new Rectangle(5, 40);
+        rightSkid.setTranslateX(15);
+        rightSkid.setTranslateY(-12);
+        rightSkid.setFill(Color.PERU);
+        add(rightSkid);
+
+        Rectangle tail = new Rectangle(5, 40);
+        tail.setTranslateX(-3);
+        tail.setTranslateY(-50);
+        tail.setFill(Color.PERU);
+        add(tail);
+
+        Rectangle leftConnect1 = new Rectangle(4, 3);
+        leftConnect1.setTranslateX(-14);
+        leftConnect1.setTranslateY(-2);
+        leftConnect1.setFill(Color.PERU);
+        add(leftConnect1);
+
+        Rectangle leftConnect2 = new Rectangle(4, 3);
+        leftConnect2.setTranslateX(-14);
+        leftConnect2.setTranslateY(15);
+        leftConnect2.setFill(Color.PERU);
+        add(leftConnect2);
+
+        Rectangle rightConnect1 = new Rectangle(4, 3);
+        rightConnect1.setTranslateX(10);
+        rightConnect1.setTranslateY(-2);
+        rightConnect1.setFill(Color.PERU);
+        add(rightConnect1);
+
+        Rectangle rightConnect2 = new Rectangle(4, 3);
+        rightConnect2.setTranslateX(10);
+        rightConnect2.setTranslateY(15);
+        rightConnect2.setFill(Color.PERU);
+        add(rightConnect2);
+
+        Rectangle rotorConnect = new Rectangle(4,3);
+        rotorConnect.setTranslateX(3);
+        rotorConnect.setTranslateY(-45);
+        rotorConnect.setFill(Color.PERU);
+        add(rotorConnect);
+
+        Rectangle rearRotor = new Rectangle(3,22);
+        rearRotor.setTranslateX(8);
+        rearRotor.setTranslateY(-55);
+        rearRotor.setFill(Color.PERU);
+        add(rearRotor);
+
         text = new GameText(String.valueOf(fuel));
         text.myTranslation.setX(0);
         text.myTranslation.setY(0);
@@ -243,14 +319,15 @@ class Game{
                 && heli.myTranslation.getY() >
                 (cloud.myTranslation.getY() - cloud.getRadius())
         ){
-            System.out.println("COLLISION");
 
-            if(heli.shoot){
-                pond.scale(pond.getScaleX() + 10, pond.getScaleY() + 10);  //TODO fix scaling
-                System.out.println("PEW PEW PEW");
-                System.out.println(pond.getScaleX());
+            if(heli.shoot){// TODO only scaling one time
+                System.out.println("Before: " + pond.myScale.getX());
+//                pond.myScale.setY(pond.getScaleY() + 2);
+//                pond.myScale.setX(pond.getScaleX() + 2);
+                pond.scale(pond.getScaleX() + 2, pond.getScaleY() + 2);
+                System.out.println("After: " + pond.myScale.getX());
+                heli.shoot = false;
             }
-
         }
     }
 
