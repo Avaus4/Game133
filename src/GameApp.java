@@ -104,15 +104,18 @@ class Pond extends GameObject {
         translate(rand.nextInt(rand.nextInt(250) + 100),
                 (rand.nextInt(350) + 200));
 
-        text = new GameText(String.valueOf(size));
+        text = new GameText(String.valueOf(size + " %"));
         add(text);
     }
 
     public void beingSeeded(int n){
         if(n > 1){
-            size++;
-            this.scale(myScale.getX() + 0.05, myScale.getY() + 0.05);
-            text.setText(size + " %");
+            if(size<=99){
+                size++;
+                this.scale(myScale.getX() + 0.05, myScale.getY() + 0.05);
+                text.setText(size + " %");
+            }
+
         }
     }
 
@@ -142,6 +145,11 @@ class Cloud extends GameObject{
         else if(seed>0){ seed--; }
         text.setText(String.valueOf(seed + "%"));
         return seed;
+    }
+
+    public void deSeed(){
+        if(seed>0){ seed--; }
+        text.setText(String.valueOf(seed + "%"));
     }
 }
 
@@ -326,7 +334,6 @@ class Game extends Pane{
     }
 
 
-
     public Game(Pane root, Helicopter heli, Set<KeyCode> keysDown) {
 
         Pond pond = (Pond) root.getChildren().get(1);
@@ -360,9 +367,12 @@ class Game extends Pane{
                    }
                 }
 
+
                 if (frameCount % 60 == 0){
                     pond.beingSeeded(cloud.seed);
+                    cloud.deSeed();
                 }
+
                // System.out.println(keysDown); // FOR TEST PURPOSES
 
                 if (old < 0) old = nano;
@@ -377,9 +387,7 @@ class Game extends Pane{
                        heli.fuel -= 1;
                        heli.text.setText(String.valueOf(heli.fuel));
                    }
-
                 }
-
                 frameCount++;
             }
 
