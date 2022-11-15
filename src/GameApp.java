@@ -1,23 +1,22 @@
 import javafx.animation.AnimationTimer;
-import javafx.application.Application; // JavaFX application support
+import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.TriangleMesh;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -109,13 +108,21 @@ class Pond extends GameObject {
         add(text);
     }
 
+    public void beingSeeded(int n){
+        if(n > 1){
+            size++;
+            this.scale(myScale.getX() + 0.05, myScale.getY() + 0.05);
+            text.setText(size + " %");
+        }
+    }
+
 }
 
 class Cloud extends GameObject{
     Random rand = new Random();
     Circle cloud;
-    double size = 30;
     int r;
+    int seed = 0;
     GameText text;
     public Cloud(){
         r = rand.nextInt(20)+30;
@@ -125,12 +132,17 @@ class Cloud extends GameObject{
         translate(rand.nextInt(rand.nextInt(250) + 100),
                 (rand.nextInt(350) + 200));
 
-        text = new GameText(String.valueOf(size));
-        //lock
+        text = new GameText(String.valueOf(seed) + " %");
         add(text);
     }
-
     public int getRadius() { return r;}
+
+    public int seeding(){
+        if(seed <= 100){ seed++; }
+        else if(seed>0){ seed--; }
+        text.setText(String.valueOf(seed + "%"));
+        return seed;
+    }
 }
 
 class Helipad extends GameObject {
@@ -155,98 +167,90 @@ class Helipad extends GameObject {
     }
 }
 
-
-class Helicopter extends GameObject{
-
-    double velocity = 0;
-    double vy;
-    double vx;
-    boolean ignition;
-    boolean shoot;
-    GameText text;
-    int fuel = 1000;
-    public Helicopter() {
-        /* A1
-        Rectangle rect = new Rectangle(5, 40);
-        rect.setStroke(Color.LIMEGREEN);
-        rect.setFill(Color.LIGHTSLATEGRAY);
-        add(rect);
-        Circle circ = new Circle(20);
-        circ.setStroke(Color.LIMEGREEN);
-        add(circ);
-         */
+class HeloBody extends Group{
+    public HeloBody(){
+        Group hbGroup = new Group();
 
         Circle body = new Circle(10);
         body.setScaleY(2);
         body.setTranslateY(10);
         body.setFill(Color.PERU);
-        add(body);
 
         Circle window = new Circle(8);
         window.setScaleY(2);
         window.setTranslateY(14);
         window.setFill(Color.SKYBLUE);
-        add(window);
 
         Rectangle cutOff = new Rectangle(16, 20);
         cutOff.setTranslateY(-4);
         cutOff.setTranslateX(-8);
         cutOff.setFill(Color.PERU);
-        add(cutOff);
 
         Rectangle leftSkid = new Rectangle(5, 40);
         leftSkid.setTranslateX(-20);
         leftSkid.setTranslateY(-12);
         leftSkid.setFill(Color.PERU);
-        add(leftSkid);
 
         Rectangle rightSkid = new Rectangle(5, 40);
         rightSkid.setTranslateX(15);
         rightSkid.setTranslateY(-12);
         rightSkid.setFill(Color.PERU);
-        add(rightSkid);
 
         Rectangle tail = new Rectangle(5, 40);
         tail.setTranslateX(-3);
         tail.setTranslateY(-50);
         tail.setFill(Color.PERU);
-        add(tail);
 
         Rectangle leftConnect1 = new Rectangle(4, 3);
         leftConnect1.setTranslateX(-14);
         leftConnect1.setTranslateY(-2);
         leftConnect1.setFill(Color.PERU);
-        add(leftConnect1);
 
         Rectangle leftConnect2 = new Rectangle(4, 3);
         leftConnect2.setTranslateX(-14);
         leftConnect2.setTranslateY(15);
         leftConnect2.setFill(Color.PERU);
-        add(leftConnect2);
 
         Rectangle rightConnect1 = new Rectangle(4, 3);
         rightConnect1.setTranslateX(10);
         rightConnect1.setTranslateY(-2);
         rightConnect1.setFill(Color.PERU);
-        add(rightConnect1);
 
         Rectangle rightConnect2 = new Rectangle(4, 3);
         rightConnect2.setTranslateX(10);
         rightConnect2.setTranslateY(15);
         rightConnect2.setFill(Color.PERU);
-        add(rightConnect2);
 
         Rectangle rotorConnect = new Rectangle(4,3);
         rotorConnect.setTranslateX(3);
         rotorConnect.setTranslateY(-45);
         rotorConnect.setFill(Color.PERU);
-        add(rotorConnect);
 
         Rectangle rearRotor = new Rectangle(3,22);
         rearRotor.setTranslateX(8);
         rearRotor.setTranslateY(-55);
         rearRotor.setFill(Color.PERU);
-        add(rearRotor);
+
+        Circle dot = new Circle(5);
+        dot.setFill(Color.LIME);
+
+        this.getChildren().addAll(body, window,  cutOff, leftSkid,
+                rightSkid, tail, leftConnect1, leftConnect2, rightConnect1,
+                rightConnect2, rotorConnect, rearRotor, dot);
+    }
+}
+
+
+class Helicopter extends GameObject{
+    double velocity = 0;
+    double vy;
+    double vx;
+    boolean ignition;
+    GameText text;
+    int fuel = 1000;
+    public Helicopter() {
+      HeloBody hb = new HeloBody();
+      add(hb);
 
         text = new GameText(String.valueOf(fuel));
         text.myTranslation.setX(0);
@@ -301,43 +305,36 @@ class Helicopter extends GameObject{
     }
 }
 
-class Game{
+class Game extends Pane{
     double old = -1;
     double elapsedTime = 0;
-    double ft;
     double conv_to_sec = 1e9;
     int frameCount_avg = 30;
     int frameCount = 0;
 
-    public void Collision(Helicopter heli, Cloud cloud, Pond pond){
-        if(heli.myTranslation.getX()
+
+
+    public boolean isHeliCloudCollision(Helicopter heli, Cloud cloud){
+        return  heli.myTranslation.getX()
                 > (cloud.myTranslation.getX() - cloud.getRadius())
                 && heli.myTranslation.getX() <
                 (cloud.myTranslation.getX() + cloud.getRadius())
                 && heli.myTranslation.getY() <
                 (cloud.myTranslation.getY() + cloud.getRadius())
                 && heli.myTranslation.getY() >
-                (cloud.myTranslation.getY() - cloud.getRadius())
-        ){
-
-            if(heli.shoot){// TODO only scaling one time
-                System.out.println("Before: " + pond.myScale.getX());
-//                pond.myScale.setY(pond.getScaleY() + 2);
-//                pond.myScale.setX(pond.getScaleX() + 2);
-                pond.scale(pond.getScaleX() + 2, pond.getScaleY() + 2);
-                System.out.println("After: " + pond.myScale.getX());
-                heli.shoot = false;
-            }
-        }
+                (cloud.myTranslation.getY() - cloud.getRadius());
     }
+
 
 
     public Game(Pane root, Helicopter heli, Set<KeyCode> keysDown) {
 
+        Pond pond = (Pond) root.getChildren().get(1);
+        Cloud cloud = (Cloud) root.getChildren().get(2);
+
         AnimationTimer loop = new AnimationTimer() {
             @Override
             public void handle(long nano) {
-
                 heli.update();
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.W)){
@@ -358,11 +355,15 @@ class Game{
                    heli.ignition = true;
                 }
                 if(keysDown.contains(KeyCode.SPACE)){
-                    heli.shoot = true;
-                    Collision(heli, (Cloud) root.getChildren().get(2),
-                            (Pond) root.getChildren().get(1));
+                   if(isHeliCloudCollision(heli, cloud)){
+                       cloud.seeding();
+                   }
                 }
-                //System.out.println(keysDown); // FOR TEST PURPOSES
+
+                if (frameCount % 60 == 0){
+                    pond.beingSeeded(cloud.seed);
+                }
+               // System.out.println(keysDown); // FOR TEST PURPOSES
 
                 if (old < 0) old = nano;
                 double delta = (nano - old) / conv_to_sec;
