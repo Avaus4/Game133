@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="moved the helicopter node to be made in HeloBody&#10;fixed the scaling of the pond when cloud is seeded&#10;fixed the text of the cloud based on seeding&#10;made a seeding method in cloud and a beingSeeded method in pond">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="-worked on GameText class and added it to helicopter object&#10;-made a throttle for the foward/backward motion&#10;-fixed update method">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>

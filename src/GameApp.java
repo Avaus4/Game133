@@ -175,6 +175,22 @@ class Helipad extends GameObject {
     }
 }
 
+class HeloBlade extends GameObject{
+    Rectangle rotor;
+    public HeloBlade(){
+        rotor = new Rectangle(5, 80);
+        rotor.setFill(Color.HOTPINK);
+        rotor.setTranslateY(-40);
+        rotor.setTranslateX(-2);
+        add(rotor);
+    }
+
+
+    public void update(){
+       rotate(getMyRotation()+10);
+    }
+}
+
 class HeloBody extends Group{
     public HeloBody(){
         Group hbGroup = new Group();
@@ -256,15 +272,20 @@ class Helicopter extends GameObject{
     boolean ignition;
     GameText text;
     int fuel = 1000;
+    HeloBlade blade;
+    HeloBody body;
     public Helicopter() {
-      HeloBody hb = new HeloBody();
-      add(hb);
+      body = new HeloBody();
+      blade = new HeloBlade();
+      add(body);
+      add(blade);
 
-        text = new GameText(String.valueOf(fuel));
-        text.myTranslation.setX(0);
-        text.myTranslation.setY(0);
-        add(text);
-        text.setTextLoc(this);
+
+      text = new GameText(String.valueOf(fuel));
+      text.myTranslation.setX(0);
+      text.myTranslation.setY(0);
+      add(text);
+      text.setTextLoc(this);
     }
 
     public void throttle(Boolean b){
@@ -345,7 +366,7 @@ class Game extends Pane{
                 heli.update();
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.W)){
-                   heli.throttle(true);
+                    heli.throttle(true);
                 }
                 if (keysDown.contains(KeyCode.S)){
                     heli.throttle(false);
@@ -359,7 +380,7 @@ class Game extends Pane{
                     heli.moveRight();
                 }
                 if(keysDown.contains(KeyCode.I)){
-                   heli.ignition = true;
+                    heli.ignition = true;
                 }
                 if(keysDown.contains(KeyCode.SPACE)){
                    if(isHeliCloudCollision(heli, cloud)){
@@ -367,6 +388,8 @@ class Game extends Pane{
                    }
                 }
 
+                if(heli.ignition)
+                    heli.blade.update();
 
                 if (frameCount % 60 == 0){
                     pond.beingSeeded(cloud.seed);
@@ -383,10 +406,10 @@ class Game extends Pane{
                 double fps = (1 / delta);
 
                 if (frameCount % frameCount_avg == 0) { //TODO need to revisit when throttle leads to more fuel usage
-                   if(heli.ignition == true){
-                       heli.fuel -= 1;
-                       heli.text.setText(String.valueOf(heli.fuel));
-                   }
+                    if(heli.ignition == true){
+                        heli.fuel -= 1;
+                        heli.text.setText(String.valueOf(heli.fuel));
+                    }
                 }
                 frameCount++;
             }
