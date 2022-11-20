@@ -4,6 +4,8 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -68,7 +70,16 @@ abstract class GameObject extends Group implements Updatable {
     }
 }
 
-
+class Background{
+    public Background(Pane root){
+        Image image = new Image("csc133MAP.jpg");
+        ImageView view = new ImageView(image);
+        view.setScaleY(-1);
+        view.setFitHeight(700);
+        view.setFitWidth(400);
+        root.getChildren().add(view);
+    }
+}
 class GameText extends GameObject{
     Text text;
     public GameText(String textString){
@@ -198,62 +209,62 @@ class HeloBody extends Group{
         Circle body = new Circle(10);
         body.setScaleY(2);
         body.setTranslateY(10);
-        body.setFill(Color.PERU);
+        body.setFill(Color.SEAGREEN);
 
         Circle window = new Circle(8);
         window.setScaleY(2);
         window.setTranslateY(14);
-        window.setFill(Color.SKYBLUE);
+        window.setFill(Color.BLUE);
 
         Rectangle cutOff = new Rectangle(16, 20);
         cutOff.setTranslateY(-4);
         cutOff.setTranslateX(-8);
-        cutOff.setFill(Color.PERU);
+        cutOff.setFill(Color.SEAGREEN);
 
         Rectangle leftSkid = new Rectangle(5, 40);
         leftSkid.setTranslateX(-20);
         leftSkid.setTranslateY(-12);
-        leftSkid.setFill(Color.PERU);
+        leftSkid.setFill(Color.SEAGREEN);
 
         Rectangle rightSkid = new Rectangle(5, 40);
         rightSkid.setTranslateX(15);
         rightSkid.setTranslateY(-12);
-        rightSkid.setFill(Color.PERU);
+        rightSkid.setFill(Color.SEAGREEN);
 
         Rectangle tail = new Rectangle(5, 40);
         tail.setTranslateX(-3);
         tail.setTranslateY(-50);
-        tail.setFill(Color.PERU);
+        tail.setFill(Color.SEAGREEN);
 
         Rectangle leftConnect1 = new Rectangle(4, 3);
         leftConnect1.setTranslateX(-14);
         leftConnect1.setTranslateY(-2);
-        leftConnect1.setFill(Color.PERU);
+        leftConnect1.setFill(Color.SEAGREEN);
 
         Rectangle leftConnect2 = new Rectangle(4, 3);
         leftConnect2.setTranslateX(-14);
         leftConnect2.setTranslateY(15);
-        leftConnect2.setFill(Color.PERU);
+        leftConnect2.setFill(Color.SEAGREEN);
 
         Rectangle rightConnect1 = new Rectangle(4, 3);
         rightConnect1.setTranslateX(10);
         rightConnect1.setTranslateY(-2);
-        rightConnect1.setFill(Color.PERU);
+        rightConnect1.setFill(Color.SEAGREEN);
 
         Rectangle rightConnect2 = new Rectangle(4, 3);
         rightConnect2.setTranslateX(10);
         rightConnect2.setTranslateY(15);
-        rightConnect2.setFill(Color.PERU);
+        rightConnect2.setFill(Color.SEAGREEN);
 
         Rectangle rotorConnect = new Rectangle(4,3);
         rotorConnect.setTranslateX(3);
         rotorConnect.setTranslateY(-45);
-        rotorConnect.setFill(Color.PERU);
+        rotorConnect.setFill(Color.SEAGREEN);
 
         Rectangle rearRotor = new Rectangle(3,22);
         rearRotor.setTranslateX(8);
         rearRotor.setTranslateY(-55);
-        rearRotor.setFill(Color.PERU);
+        rearRotor.setFill(Color.SEAGREEN);
 
         Circle dot = new Circle(5);
         dot.setFill(Color.LIME);
@@ -357,8 +368,8 @@ class Game extends Pane{
 
     public Game(Pane root, Helicopter heli, Set<KeyCode> keysDown) {
 
-        Pond pond = (Pond) root.getChildren().get(1);
-        Cloud cloud = (Cloud) root.getChildren().get(2);
+        Pond pond = (Pond) root.getChildren().get(2);
+        Cloud cloud = (Cloud) root.getChildren().get(3);
 
         AnimationTimer loop = new AnimationTimer() {
             @Override
@@ -422,7 +433,7 @@ class Game extends Pane{
 public class GameApp extends Application {
     private static final int GAME_WIDTH = 400;
 
-    private static final int GAME_HEIGHT = 800;//TODO set back to 800
+    private static final int GAME_HEIGHT = 700;//TODO set back to 800
 
     @Override
     public void start(Stage primaryStage) {
@@ -432,10 +443,10 @@ public class GameApp extends Application {
         Helipad hp = new Helipad();
         Pond pond = new Pond();
         Cloud cloud = new Cloud();
+        Background bg = new Background(root);
         root.getChildren().addAll(hp, pond, cloud, heli);
         heli.translate(200, 50);
         heli.pivot();
-
 
 
         // show the initial Scene for your application
