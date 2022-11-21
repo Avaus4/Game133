@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Made the HeloBlade class and added blades to helicopter, worked on the behavior of the blades spinning.">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="putting background image to repo">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>
@@ -93,7 +93,21 @@
       <option name="project" value="LOCAL" />
       <updated>1668573042490</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Made the Background class and added a jpg to make the background of the game">
+      <created>1668908183729</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1668908183729</updated>
+    </task>
+    <task id="LOCAL-00008" summary="putting background image to repo">
+      <created>1668945792017</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1668945792017</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -114,6 +128,8 @@
     <MESSAGE value="Started on making the A2 Helicopter as well as fixing the scaling." />
     <MESSAGE value="moved the helicopter node to be made in HeloBody&#10;fixed the scaling of the pond when cloud is seeded&#10;fixed the text of the cloud based on seeding&#10;made a seeding method in cloud and a beingSeeded method in pond" />
     <MESSAGE value="Made the HeloBlade class and added blades to helicopter, worked on the behavior of the blades spinning." />
-    <option name="LAST_COMMIT_MESSAGE" value="Made the HeloBlade class and added blades to helicopter, worked on the behavior of the blades spinning." />
+    <MESSAGE value="Made the Background class and added a jpg to make the background of the game" />
+    <MESSAGE value="putting background image to repo" />
+    <option name="LAST_COMMIT_MESSAGE" value="putting background image to repo" />
   </component>
 </project>

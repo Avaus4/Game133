@@ -75,7 +75,7 @@ class Background{
         Image image = new Image("csc133MAP.jpg");
         ImageView view = new ImageView(image);
         view.setScaleY(-1);
-        view.setFitHeight(700);
+        view.setFitHeight(800);//TODO set back to 800
         view.setFitWidth(400);
         root.getChildren().add(view);
     }
@@ -275,7 +275,6 @@ class HeloBody extends Group{
     }
 }
 
-
 class Helicopter extends GameObject{
     double velocity = 0;
     double vy;
@@ -351,8 +350,9 @@ class Game extends Pane{
     double conv_to_sec = 1e9;
     int frameCount_avg = 30;
     int frameCount = 0;
+    int count = 0;
 
-
+    boolean pressed = false;
 
     public boolean isHeliCloudCollision(Helicopter heli, Cloud cloud){
         return  heli.myTranslation.getX()
@@ -365,11 +365,35 @@ class Game extends Pane{
                 (cloud.myTranslation.getY() - cloud.getRadius());
     }
 
+    public void init(Pane root){
 
-    public Game(Pane root, Helicopter heli, Set<KeyCode> keysDown) {
+            Helicopter heli = (Helicopter) root.getChildren().get(4);
+            heli.myTranslation.setX(200);
+            heli.myTranslation.setY(50);
+            heli.throttle(false);
+            heli.ignition = false;
+            heli.myRotation.setAngle(0);
+            heli.fuel = 1000;
+            heli.text.setText(String.valueOf(heli.fuel));
+            heli.velocity = 0;
+
+            root.getChildren().remove(2);
+            root.getChildren().remove(3);
+
+            Cloud cloud = new Cloud();
+            Pond pond = new Pond();
+            root.getChildren().add(2, pond);
+            root.getChildren().add(3, cloud);
+            root.getChildren().set(4, heli);
+    }
+
+
+
+    public Game(Pane root, Set<KeyCode> keysDown) {
 
         Pond pond = (Pond) root.getChildren().get(2);
         Cloud cloud = (Cloud) root.getChildren().get(3);
+        Helicopter heli = (Helicopter)  root.getChildren().get(4);
 
         AnimationTimer loop = new AnimationTimer() {
             @Override
@@ -398,9 +422,20 @@ class Game extends Pane{
                        cloud.seeding();
                    }
                 }
+                if(keysDown.contains(KeyCode.R)){ //FIX THIS TO BE restart
+                    pressed = true;
+                }
+
+
 
                 if(heli.ignition)
                     heli.blade.update();
+
+//TODO if wanted work on this to deal with restart lag/repeats
+                if ((frameCount % 8 == 0) && (pressed)) {
+                    init(root);
+                    pressed = false;
+                }
 
                 if (frameCount % 60 == 0){
                     pond.beingSeeded(cloud.seed);
@@ -433,7 +468,9 @@ class Game extends Pane{
 public class GameApp extends Application {
     private static final int GAME_WIDTH = 400;
 
-    private static final int GAME_HEIGHT = 700;//TODO set back to 800
+    private static final int GAME_HEIGHT = 800;//TODO set back to 800
+
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -471,13 +508,18 @@ public class GameApp extends Application {
                 keysdown.add(event.getCode());
             }
         });
+        scene.setOnMousePressed(e ->{
+
+        });
         scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent event) {
                 keysdown.remove(event.getCode());
             }
         });
 
-        Game game = new Game(root, heli, keysdown);
+
+
+        Game game = new Game(root, keysdown);
 
     }
 
