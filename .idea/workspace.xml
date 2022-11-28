@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="putting background image to repo">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Fixed the init method to restart the game when R key is pressed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>
@@ -35,13 +35,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Austin/IdeaProjects/Game133&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/Users/austi/IdeaProjects/CSC133"
   }
-}</component>
+}]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -107,7 +107,14 @@
       <option name="project" value="LOCAL" />
       <updated>1668945792017</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Fixed the init method to restart the game when R key is pressed">
+      <created>1669006986905</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1669006986905</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -130,6 +137,7 @@
     <MESSAGE value="Made the HeloBlade class and added blades to helicopter, worked on the behavior of the blades spinning." />
     <MESSAGE value="Made the Background class and added a jpg to make the background of the game" />
     <MESSAGE value="putting background image to repo" />
-    <option name="LAST_COMMIT_MESSAGE" value="putting background image to repo" />
+    <MESSAGE value="Fixed the init method to restart the game when R key is pressed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed the init method to restart the game when R key is pressed" />
   </component>
 </project>

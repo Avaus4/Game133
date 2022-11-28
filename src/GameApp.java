@@ -196,9 +196,13 @@ class HeloBlade extends GameObject{
         add(rotor);
     }
 
-
+    double rotationalSpeed = 0;//starting rotor speed
+    double maxSpeed = 15;
+    boolean off = true;
+    boolean starting;
+    boolean ready;
     public void update(){
-       rotate(getMyRotation()+10);
+       rotate(getMyRotation()+rotationalSpeed);
     }
 }
 
@@ -311,17 +315,48 @@ class Helicopter extends GameObject{
         }
     }
 
+    public boolean isHeliOnHP(){
+        return (myTranslation.getX() >= 150) && (myTranslation.getX() <= 250) &&
+                (myTranslation.getY() >= 10) && (myTranslation.getY() <= 110);
+    }
 
     @Override
     public void update() {
-        if(myRotation.getAngle() !=  0) {
-            myTranslation.setX(myTranslation.getX() + vx);
-            myTranslation.setY(myTranslation.getY() + vy);
+        blade.update();
+
+        if(blade.off && ignition && isHeliOnHP()){
+            blade.starting = true;
+            blade.off = false;
+            blade.ready = false;
         }
-        else {
-            myTranslation.setY(myTranslation.getY() + velocity);
+        else if(blade.starting){
+            if(blade.rotationalSpeed < blade.maxSpeed){
+                blade.rotationalSpeed+=.5;
+                //System.out.println(blade.rotationalSpeed);
+            }
+            if(blade.rotationalSpeed >= blade.maxSpeed) {
+                blade.starting = false;
+                blade.ready = true;
+            }
         }
-        pivot();
+        else if(blade.ready){
+            if(myRotation.getAngle() !=  0) {
+                myTranslation.setX(myTranslation.getX() + vx);
+                myTranslation.setY(myTranslation.getY() + vy);
+            }
+            else {
+                myTranslation.setY(myTranslation.getY() + velocity);
+            }
+            pivot();
+        }
+        if(!ignition && isHeliOnHP()) {
+            if (blade.rotationalSpeed > 0)
+                blade.rotationalSpeed--;
+            if (blade.rotationalSpeed < 0)
+                blade.rotationalSpeed = 0;
+            blade.ready = false;
+            blade.off = true;
+        }
     }
 
     public void moveLeft(){
@@ -350,11 +385,10 @@ class Game extends Pane{
     double conv_to_sec = 1e9;
     int frameCount_avg = 30;
     int frameCount = 0;
-    int count = 0;
-
     boolean pressed = false;
 
     public boolean isHeliCloudCollision(Helicopter heli, Cloud cloud){
+
         return  heli.myTranslation.getX()
                 > (cloud.myTranslation.getX() - cloud.getRadius())
                 && heli.myTranslation.getX() <
@@ -364,7 +398,6 @@ class Game extends Pane{
                 && heli.myTranslation.getY() >
                 (cloud.myTranslation.getY() - cloud.getRadius());
     }
-
     public void init(Pane root){
 
             Helicopter heli = (Helicopter) root.getChildren().get(4);
@@ -376,6 +409,7 @@ class Game extends Pane{
             heli.fuel = 1000;
             heli.text.setText(String.valueOf(heli.fuel));
             heli.velocity = 0;
+            heli.blade.rotationalSpeed = 0;
 
             root.getChildren().remove(2);
             root.getChildren().remove(3);
@@ -387,17 +421,25 @@ class Game extends Pane{
             root.getChildren().set(4, heli);
     }
 
-
-
+    public void ignitCheck(Helicopter heli){
+        if(heli.ignition && heli.isHeliOnHP())
+            heli.ignition = false;
+        else
+            heli.ignition = true;
+        System.out.println(heli.ignition);
+    }
     public Game(Pane root, Set<KeyCode> keysDown) {
 
-        Pond pond = (Pond) root.getChildren().get(2);
-        Cloud cloud = (Cloud) root.getChildren().get(3);
-        Helicopter heli = (Helicopter)  root.getChildren().get(4);
+        Helicopter heli = (Helicopter) root.getChildren().get(4);
+        Helipad hp = (Helipad) root.getChildren().get(1);
 
         AnimationTimer loop = new AnimationTimer() {
             @Override
             public void handle(long nano) {
+                //placed here so when init is called pond and cloud get updated
+                Pond pond = (Pond) root.getChildren().get(2);
+                Cloud cloud = (Cloud) root.getChildren().get(3);
+
                 heli.update();
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.W)){
@@ -415,21 +457,23 @@ class Game extends Pane{
                     heli.moveRight();
                 }
                 if(keysDown.contains(KeyCode.I)){
-                    heli.ignition = true;
+                    if ((frameCount % 8 == 0)){
+                        ignitCheck(heli);
+                    }
                 }
                 if(keysDown.contains(KeyCode.SPACE)){
                    if(isHeliCloudCollision(heli, cloud)){
                        cloud.seeding();
                    }
                 }
-                if(keysDown.contains(KeyCode.R)){ //FIX THIS TO BE restart
+                if(keysDown.contains(KeyCode.R)){ //rename pressed boolean
                     pressed = true;
                 }
 
+                if(keysDown.contains(KeyCode.U)){//TEST FOR INCREASING RS
+                    heli.blade.rotationalSpeed+=1;
+                }
 
-
-                if(heli.ignition)
-                    heli.blade.update();
 
 //TODO if wanted work on this to deal with restart lag/repeats
                 if ((frameCount % 8 == 0) && (pressed)) {
@@ -442,7 +486,7 @@ class Game extends Pane{
                     cloud.deSeed();
                 }
 
-               // System.out.println(keysDown); // FOR TEST PURPOSES
+                //System.out.println(keysDown); // FOR TEST PURPOSES
 
                 if (old < 0) old = nano;
                 double delta = (nano - old) / conv_to_sec;
