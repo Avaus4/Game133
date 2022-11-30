@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -19,9 +20,8 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 
 interface Updatable {
     void update();
@@ -137,6 +137,7 @@ class Cloud extends GameObject{
     Circle cloud;
     int r;
     int seed = 0;
+    double cloudSpeed = (rand.nextDouble(.5)+.01);
     GameText text;
     public Cloud(){
         r = rand.nextInt(20)+30;
@@ -150,7 +151,6 @@ class Cloud extends GameObject{
         add(text);
     }
     public int getRadius() { return r;}
-
     public int seeding(){
         if(seed <= 100){ seed++; }
         else if(seed>0){ seed--; }
@@ -162,8 +162,51 @@ class Cloud extends GameObject{
         if(seed>0){ seed--; }
         text.setText(String.valueOf(seed + "%"));
     }
+
+    public void update(){
+        myTranslation.setX(myTranslation.getX() + cloudSpeed);
+        if(myTranslation.getX() > 400){
+            myTranslation.setX(0);
+            myTranslation.setY(rand.nextInt(350)+200);
+            myTranslation.setX(myTranslation.getX() + cloudSpeed);
+        }
+    }
 }
 
+class DistanceLines extends GameObject{
+    Line line0 = new Line();
+    Line line1 = new Line();
+    Line line2 = new Line();
+
+    public DistanceLines(/*Cloud cloud, ArrayList<Pond> ponds*/){
+        line0.setStroke(Color.HOTPINK);
+        line0.setStrokeWidth(3.0);
+        line1.setStroke(Color.HOTPINK);
+        line1.setStrokeWidth(3.0);
+        line2.setStroke(Color.HOTPINK);
+        line2.setStrokeWidth(3.0);
+        add(line0);
+        add(line1);
+        add(line2);
+    }
+
+    public void update(Cloud cloud, ArrayList<Pond> ponds){
+        line0.setStartX(cloud.myTranslation.getX());
+        line1.setStartX(cloud.myTranslation.getX());
+        line2.setStartX(cloud.myTranslation.getX());
+        line0.setStartY(cloud.myTranslation.getY());
+        line1.setStartY(cloud.myTranslation.getY());
+        line2.setStartY(cloud.myTranslation.getY());
+
+        line0.setEndX(ponds.get(0).myTranslation.getX());
+        line1.setEndX(ponds.get(1).myTranslation.getX());
+        line2.setEndX(ponds.get(2).myTranslation.getX());
+        line0.setEndY(ponds.get(0).myTranslation.getY());
+        line1.setEndY(ponds.get(1).myTranslation.getY());
+        line2.setEndY(ponds.get(2).myTranslation.getY());
+    }
+
+}
 class Helipad extends GameObject {
     public Helipad(){
 
@@ -332,9 +375,8 @@ class Helicopter extends GameObject{
         else if(blade.starting){
             if(blade.rotationalSpeed < blade.maxSpeed){
                 blade.rotationalSpeed+=.5;
-                //System.out.println(blade.rotationalSpeed);
             }
-            if(blade.rotationalSpeed >= blade.maxSpeed) {
+            if(blade.rotationalSpeed >= blade.maxSpeed){
                 blade.starting = false;
                 blade.ready = true;
             }
@@ -385,7 +427,7 @@ class Game extends Pane{
     double conv_to_sec = 1e9;
     int frameCount_avg = 30;
     int frameCount = 0;
-    boolean pressed = false;
+    boolean resetPressed = false;
 
     public boolean isHeliCloudCollision(Helicopter heli, Cloud cloud){
 
@@ -400,25 +442,25 @@ class Game extends Pane{
     }
     public void init(Pane root){
 
-            Helicopter heli = (Helicopter) root.getChildren().get(4);
-            heli.myTranslation.setX(200);
-            heli.myTranslation.setY(50);
-            heli.throttle(false);
-            heli.ignition = false;
-            heli.myRotation.setAngle(0);
-            heli.fuel = 1000;
-            heli.text.setText(String.valueOf(heli.fuel));
-            heli.velocity = 0;
-            heli.blade.rotationalSpeed = 0;
+        Helicopter heli = (Helicopter) root.getChildren().get(4);
+        heli.myTranslation.setX(200);
+        heli.myTranslation.setY(50);
+        heli.throttle(false);
+        heli.ignition = false;
+        heli.myRotation.setAngle(0);
+        heli.fuel = 1000;
+        heli.text.setText(String.valueOf(heli.fuel));
+        heli.velocity = 0;
+        heli.blade.rotationalSpeed = 0;
 
-            root.getChildren().remove(2);
-            root.getChildren().remove(3);
+        root.getChildren().remove(2);
+        root.getChildren().remove(3);
 
-            Cloud cloud = new Cloud();
-            Pond pond = new Pond();
-            root.getChildren().add(2, pond);
-            root.getChildren().add(3, cloud);
-            root.getChildren().set(4, heli);
+        Cloud cloud = new Cloud();
+        Pond pond = new Pond();
+        root.getChildren().add(2, pond);
+        root.getChildren().add(3, cloud);
+        root.getChildren().set(4, heli);
     }
 
     public void ignitCheck(Helicopter heli){
@@ -428,7 +470,8 @@ class Game extends Pane{
             heli.ignition = true;
         System.out.println(heli.ignition);
     }
-    public Game(Pane root, Set<KeyCode> keysDown) {
+    public Game(Pane root, ArrayList<Cloud> Clouds, ArrayList<Pond> Ponds,
+                DistanceLines dl, Set<KeyCode> keysDown) {
 
         Helicopter heli = (Helicopter) root.getChildren().get(4);
         Helipad hp = (Helipad) root.getChildren().get(1);
@@ -436,11 +479,22 @@ class Game extends Pane{
         AnimationTimer loop = new AnimationTimer() {
             @Override
             public void handle(long nano) {
-                //placed here so when init is called pond and cloud get updated
-                Pond pond = (Pond) root.getChildren().get(2);
-                Cloud cloud = (Cloud) root.getChildren().get(3);
+
+                Pond pond0 = Ponds.get(0);
+                Pond pond1 = Ponds.get(1);
+                Pond pond2 = Ponds.get(2);
+
+                Cloud cloud0 = Clouds.get(0);
+                Cloud cloud1 = Clouds.get(1);
+                Cloud cloud2 = Clouds.get(2);
+                cloud0.update(); cloud1.update(); cloud2.update();
 
                 heli.update();
+                dl.update(cloud0, Ponds);
+                dl.update(cloud1, Ponds);
+                dl.update(cloud2, Ponds);
+
+
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.W)){
                     heli.throttle(true);
@@ -462,28 +516,28 @@ class Game extends Pane{
                     }
                 }
                 if(keysDown.contains(KeyCode.SPACE)){
-                   if(isHeliCloudCollision(heli, cloud)){
-                       cloud.seeding();
+                   if(isHeliCloudCollision(heli, cloud0)){
+                       cloud0.seeding();
                    }
+                    if(isHeliCloudCollision(heli, cloud1)){
+                        cloud1.seeding();
+                    }
+                    if(isHeliCloudCollision(heli, cloud2)){
+                        cloud2.seeding();
+                    }
                 }
                 if(keysDown.contains(KeyCode.R)){ //rename pressed boolean
-                    pressed = true;
+                    resetPressed = true;
                 }
 
-                if(keysDown.contains(KeyCode.U)){//TEST FOR INCREASING RS
-                    heli.blade.rotationalSpeed+=1;
-                }
-
-
-//TODO if wanted work on this to deal with restart lag/repeats
-                if ((frameCount % 8 == 0) && (pressed)) {
+                if ((frameCount % 8 == 0) && (resetPressed)) {
                     init(root);
-                    pressed = false;
+                    resetPressed = false;
                 }
 
                 if (frameCount % 60 == 0){
-                    pond.beingSeeded(cloud.seed);
-                    cloud.deSeed();
+                    pond1.beingSeeded(cloud1.seed);
+                    cloud1.deSeed();
                 }
 
                 //System.out.println(keysDown); // FOR TEST PURPOSES
@@ -512,9 +566,7 @@ class Game extends Pane{
 public class GameApp extends Application {
     private static final int GAME_WIDTH = 400;
 
-    private static final int GAME_HEIGHT = 800;//TODO set back to 800
-
-
+    private static final int GAME_HEIGHT = 700;//TODO set back to 800
 
     @Override
     public void start(Stage primaryStage) {
@@ -522,10 +574,35 @@ public class GameApp extends Application {
         root.setScaleY(-1);
         Helicopter heli = new Helicopter();
         Helipad hp = new Helipad();
-        Pond pond = new Pond();
-        Cloud cloud = new Cloud();
+
+        Pond pond0 = new Pond();
+        Pond pond1 = new Pond();
+        Pond pond2 = new Pond();
+        ArrayList<Pond> pondList = new ArrayList<Pond>();
+        pondList.add(pond0);
+        pondList.add(pond1);
+        pondList.add(pond2);
+        Pane pondPane = new Pane();
+        pondPane.getChildren().addAll(pondList);
+
+        Cloud cloud0 = new Cloud();
+        Cloud cloud1 = new Cloud();
+        Cloud cloud2 = new Cloud();
+        ArrayList<Cloud> cloudList = new ArrayList<Cloud>();
+        cloudList.add(cloud0);
+        cloudList.add(cloud1);
+        cloudList.add(cloud2);
+        Pane cloudPane = new Pane();
+        cloudPane.getChildren().addAll(cloudList);
+
+        DistanceLines dl = new DistanceLines(/*cloud1, pondList*/);
+        Pane lines = new Pane();
+        lines.getChildren().add(dl);
+
         Background bg = new Background(root);
-        root.getChildren().addAll(hp, pond, cloud, heli);
+
+
+        root.getChildren().addAll(hp, pondPane, cloudPane, heli, lines);
         heli.translate(200, 50);
         heli.pivot();
 
@@ -563,7 +640,7 @@ public class GameApp extends Application {
 
 
 
-        Game game = new Game(root, keysdown);
+        Game game = new Game(root, cloudList, pondList, dl, keysdown);
 
     }
 

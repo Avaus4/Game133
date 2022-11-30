@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Fixed the init method to restart the game when R key is pressed">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Made states of the helicopter/heliblades and made it so ignition only works while on helipad">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>
@@ -35,13 +35,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Users/austi/IdeaProjects/CSC133"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/austi/IdeaProjects/CSC133&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -114,7 +114,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669006986905</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Made states of the helicopter/heliblades and made it so ignition only works while on helipad">
+      <created>1669673504805</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1669673504805</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -138,6 +145,7 @@
     <MESSAGE value="Made the Background class and added a jpg to make the background of the game" />
     <MESSAGE value="putting background image to repo" />
     <MESSAGE value="Fixed the init method to restart the game when R key is pressed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed the init method to restart the game when R key is pressed" />
+    <MESSAGE value="Made states of the helicopter/heliblades and made it so ignition only works while on helipad" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made states of the helicopter/heliblades and made it so ignition only works while on helipad" />
   </component>
 </project>
