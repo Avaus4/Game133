@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Made states of the helicopter/heliblades and made it so ignition only works while on helipad">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>
@@ -121,7 +121,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669673504805</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well">
+      <created>1669850956087</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1669850956087</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -146,6 +153,7 @@
     <MESSAGE value="putting background image to repo" />
     <MESSAGE value="Fixed the init method to restart the game when R key is pressed" />
     <MESSAGE value="Made states of the helicopter/heliblades and made it so ignition only works while on helipad" />
-    <option name="LAST_COMMIT_MESSAGE" value="Made states of the helicopter/heliblades and made it so ignition only works while on helipad" />
+    <MESSAGE value="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well" />
   </component>
 </project>
