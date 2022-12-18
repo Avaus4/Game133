@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Implemented wind, recycling clouds, distancelines, all with multiple panes and more">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>
@@ -35,13 +35,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/austi/IdeaProjects/CSC133&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/Users/austi/IdeaProjects/CSC133",
+    "settings.editor.selected.configurable": "preferences.sourceCode"
   }
-}</component>
+}]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -128,7 +129,14 @@
       <option name="project" value="LOCAL" />
       <updated>1669850956087</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Implemented wind, recycling clouds, distancelines, all with multiple panes and more">
+      <created>1671074529204</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1671074529204</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -154,6 +162,7 @@
     <MESSAGE value="Fixed the init method to restart the game when R key is pressed" />
     <MESSAGE value="Made states of the helicopter/heliblades and made it so ignition only works while on helipad" />
     <MESSAGE value="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well" />
-    <option name="LAST_COMMIT_MESSAGE" value="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well" />
+    <MESSAGE value="Implemented wind, recycling clouds, distancelines, all with multiple panes and more" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented wind, recycling clouds, distancelines, all with multiple panes and more" />
   </component>
 </project>

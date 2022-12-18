@@ -4,6 +4,8 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -19,13 +21,14 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
+
 import java.util.*;
 
 interface Updatable {
     void update();
 }
 
-abstract class GameObject extends Group implements Updatable {
+abstract class GameObject extends Group implements Updatable{
     protected Translate myTranslation;
     protected Rotate myRotation;
     protected Scale myScale;
@@ -139,9 +142,10 @@ class Cloud extends GameObject{
         r = rand.nextInt(20)+30;
         cloud = new Circle(r);
         cloud.setFill(Color.WHITE);
+        cloud.setOpacity(80.0);
         add(cloud);
-        translate(rand.nextInt(rand.nextInt(250) + 100),
-                (rand.nextInt(350) + 200));
+        translate(rand.nextInt(rand.nextInt(350) + 200),
+                (rand.nextInt(450) + 200));
 
         text = new GameText(seed + " %");
         add(text);
@@ -150,21 +154,73 @@ class Cloud extends GameObject{
     public int seeding(){
         if(seed <= 100){ seed++; }
         else if(seed>0){ seed--; }
-        text.setText(String.valueOf(seed + "%"));
+        text.setText(seed + "%");
         return seed;
     }
 
     public void deSeed(){
         if(seed>0){ seed--; }
-        text.setText(String.valueOf(seed + "%"));
+        text.setText(seed + "%");
     }
 
     public void update(){
         myTranslation.setX(myTranslation.getX() + cloudSpeed);
         if(myTranslation.getX() > 810){
             myTranslation.setX(0);
-            myTranslation.setY(rand.nextInt(550)+200);
+            myTranslation.setY(rand.nextInt(450)+200);
             myTranslation.setX(myTranslation.getX() + cloudSpeed);
+        }
+    }
+}
+class WinOrLose{
+    Game rainMaker;
+    int score;
+    int pondSum;
+    double pondAvg;
+
+    public void WinOrLose(Game game){
+        rainMaker = game;
+    }
+    public void endGame(Pane root, ArrayList<Pond> ponds,
+                        ArrayList<Cloud> clouds, Helicopter heli,
+                        Set<KeyCode> keysDown){
+        Alert a = new Alert(Alert.AlertType.INFORMATION," ",
+                ButtonType.YES, ButtonType.NO);
+        pondSum = ponds.get(0).size + ponds.get(1).size + ponds.get(2).size;
+        pondAvg = (double) pondSum/300;
+        score = (int) (pondAvg * heli.fuel);
+        System.out.println(score);
+        if((pondSum >= 240) && (heli.ignition == false)){
+            rainMaker.hasExecuted = true;
+            keysDown.clear();
+            a.setContentText("CONGRATS,YOU WON | SCORE: "+ score +" | PLAY " +
+                    "AGAIN?");
+            a.show();
+            a.setOnHidden(event -> {
+                if(a.getResult() == ButtonType.NO){
+                a.close();
+                System.exit(0);
+
+                }
+                else if(a.getResult() == ButtonType.YES){
+                    rainMaker.hasExecuted = false;
+                    rainMaker.init(root, clouds, ponds);
+                }
+            });
+        }
+        else if(heli.fuel <= 0){
+            a.setContentText("GAME OVER, PLAY AGAIN?");
+            a.show();
+            a.setOnHidden(event -> {
+                if(a.getResult() == ButtonType.NO){
+                    a.close();
+                    System.exit(0);
+                }
+                else if(a.getResult() == ButtonType.YES){
+                    rainMaker.hasExecuted = false;
+                    rainMaker.init(root, clouds, ponds);
+                }
+            });
         }
     }
 }
@@ -173,6 +229,15 @@ class DistanceLines{
     Line line0 = new Line();
     Line line1 = new Line();
     Line line2 = new Line();
+    ArrayList<Line> lineList;
+
+    public boolean isPondInRange( Line line, Cloud cloud){
+        double xs = Math.pow((line.getEndX() - line.getStartX()), 2);
+        double ys = Math.pow((line.getEndY() - line.getStartY()), 2);
+        double ans = Math.sqrt(xs + ys);
+        return (ans <= (cloud.getRadius() * 4));
+    }
+
     public DistanceLines(Pane linePane){
         line0.setStroke(Color.TRANSPARENT);
         line0.setStrokeWidth(3.0);
@@ -180,6 +245,10 @@ class DistanceLines{
         line1.setStrokeWidth(3.0);
         line2.setStroke(Color.TRANSPARENT);
         line2.setStrokeWidth(3.0);
+
+        lineList = new ArrayList<Line>();
+        lineList.add(line0);lineList.add(line1);lineList.add(line2);
+
         linePane.getChildren().addAll(line0, line1, line2);
     }
 
@@ -196,12 +265,18 @@ class DistanceLines{
         line2.setStartY(cloud.myTranslation.getY());
         line2.setEndX(ponds.get(2).myTranslation.getX());
         line2.setEndY(ponds.get(2).myTranslation.getY());
-    }
 
+        for(int i=0; i<3; i++){
+                lineList.get(i).setVisible(true);
+                if(isPondInRange(lineList.get(i), cloud))
+                    lineList.get(i).setStroke(Color.AQUAMARINE);
+                else
+                    lineList.get(i).setStroke(Color.TRANSPARENT);
+        }
+    }
 }
 class Helipad extends GameObject {
     public Helipad(){
-
         Rectangle rect = new Rectangle(100, 100);
         rect.setStroke(Color.LIMEGREEN);
         rect.setTranslateX(350);
@@ -214,15 +289,15 @@ class Helipad extends GameObject {
         circ.setTranslateY(60);
         add(circ);
     }
-
-    @Override
-    public void update() {
-
-    }
 }
 
 class HeloBlade extends GameObject{
     Rectangle rotor;
+    double rotationalSpeed = 0;//starting rotor speed
+    double maxSpeed = 15;
+    boolean off = true;
+    boolean starting;
+    boolean ready;
     public HeloBlade(){
         rotor = new Rectangle(5, 80);
         rotor.setFill(Color.HOTPINK);
@@ -230,12 +305,6 @@ class HeloBlade extends GameObject{
         rotor.setTranslateX(-2);
         add(rotor);
     }
-
-    double rotationalSpeed = 0;//starting rotor speed
-    double maxSpeed = 15;
-    boolean off = true;
-    boolean starting;
-    boolean ready;
     public void update(){
        rotate(getMyRotation()+rotationalSpeed);
     }
@@ -243,8 +312,6 @@ class HeloBlade extends GameObject{
 
 class HeloBody extends Group{
     public HeloBody(){
-        Group hbGroup = new Group();
-
         Circle body = new Circle(10);
         body.setScaleY(2);
         body.setTranslateY(10);
@@ -313,14 +380,13 @@ class HeloBody extends Group{
                 rightConnect2, rotorConnect, rearRotor, dot);
     }
 }
-
 class Helicopter extends GameObject{
     double velocity = 0;
     double vy;
     double vx;
     boolean ignition;
     GameText text;
-    int fuel = 1000;
+    int fuel = 25000;
     HeloBlade blade;
     HeloBody body;
     public Helicopter() {
@@ -329,14 +395,12 @@ class Helicopter extends GameObject{
       add(body);
       add(blade);
 
-
       text = new GameText(String.valueOf(fuel));
       text.myTranslation.setX(0);
       text.myTranslation.setY(0);
       add(text);
       text.setTextLoc(this);
     }
-
     public void throttle(Boolean b){
         if(ignition){
             if(b){
@@ -344,7 +408,7 @@ class Helicopter extends GameObject{
                     velocity+=.1;
             }
             else{
-                if(velocity > -10)
+                if(velocity > -2)
                     velocity+= -.2;
             }
         }
@@ -419,10 +483,11 @@ class Game extends Pane{
     double conv_to_sec = 1e9;
     int frameCount_avg = 30;
     int frameCount = 0;
-    boolean resetPressed = false;
-    boolean visible = false;
+    boolean isResetPressed = false;
+    boolean isVisible = false;
+    boolean hasExecuted = false;
 
-    public boolean isHeliCloudCollision(Helicopter heli, Cloud cloud){
+    public boolean isHeliCloudCollision(Helicopter heli,Cloud cloud){
 
         return  heli.myTranslation.getX()
                 > (cloud.myTranslation.getX() - cloud.getRadius())
@@ -442,11 +507,10 @@ class Game extends Pane{
         heli.throttle(false);
         heli.ignition = false;
         heli.myRotation.setAngle(0);
-        heli.fuel = 1000;
+        heli.fuel = 25000;
         heli.text.setText(String.valueOf(heli.fuel));
         heli.velocity = 0;
         heli.blade.rotationalSpeed = 0;
-
 
         Pane pondPane = (Pane) root.getChildren().get(2);
         pondPane.getChildren().removeAll(ponds);
@@ -474,48 +538,33 @@ class Game extends Pane{
 
         root.getChildren().set(4, heli);
     }
-
     public void ignitCheck(Helicopter heli){
         if(heli.ignition && heli.isHeliOnHP())
             heli.ignition = false;
         else
             heli.ignition = true;
-        System.out.println(heli.ignition);
+//        System.out.println(heli.ignition);
     }
-
-    public void invisiLine(DistanceLines dl0, DistanceLines dl1,
-                           DistanceLines dl2){
-        if(!visible){
-            visible = true;
-            dl0.line0.setStroke(Color.AQUAMARINE);
-            dl0.line1.setStroke(Color.AQUAMARINE);
-            dl0.line2.setStroke(Color.AQUAMARINE);
-            dl1.line0.setStroke(Color.AQUAMARINE);
-            dl1.line1.setStroke(Color.AQUAMARINE);
-            dl1.line2.setStroke(Color.AQUAMARINE);
-            dl2.line0.setStroke(Color.AQUAMARINE);
-            dl2.line1.setStroke(Color.AQUAMARINE);
-            dl2.line2.setStroke(Color.AQUAMARINE);
+    public void invisiLine(ArrayList<Line> lineList0,ArrayList<Line> lineList1,
+                           ArrayList<Line> lineList2){
+        if(!isVisible){
+            isVisible = true;
         }
-        else if(visible) {
-            visible = false;
-            dl0.line0.setStroke(Color.TRANSPARENT);
-            dl0.line1.setStroke(Color.TRANSPARENT);
-            dl0.line2.setStroke(Color.TRANSPARENT);
-            dl1.line0.setStroke(Color.TRANSPARENT);
-            dl1.line1.setStroke(Color.TRANSPARENT);
-            dl1.line2.setStroke(Color.TRANSPARENT);
-            dl2.line0.setStroke(Color.TRANSPARENT);
-            dl2.line1.setStroke(Color.TRANSPARENT);
-            dl2.line2.setStroke(Color.TRANSPARENT);
+        else if(isVisible) {
+            isVisible = false;
+            for(int i=0; i<3; i++) {
+                lineList0.get(i).setVisible(false);
+                lineList1.get(i).setVisible(false);
+                lineList2.get(i).setVisible(false);
+            }
         }
     }
-    public Game(Pane root, ArrayList<Cloud> Clouds, ArrayList<Pond> Ponds,
-                Set<KeyCode> keysDown) {
 
+    public Game(Pane root, ArrayList<Cloud> clouds, ArrayList<Pond> ponds,
+                Set<KeyCode> keysDown, WinOrLose wl) {
+        wl.WinOrLose(this);
         Helicopter heli = (Helicopter) root.getChildren().get(4);
         Helipad hp = (Helipad) root.getChildren().get(1);
-
         Pane linePane = (Pane) root.getChildren().get(5);
         DistanceLines dl0 = new DistanceLines(linePane);
         DistanceLines dl1 = new DistanceLines(linePane);
@@ -524,26 +573,28 @@ class Game extends Pane{
             @Override
             public void handle(long nano) {
 
-                Pond pond0 = Ponds.get(0);
-                Pond pond1 = Ponds.get(1);
-                Pond pond2 = Ponds.get(2);
+                Pond pond0 = ponds.get(0);
+                Pond pond1 = ponds.get(1);
+                Pond pond2 = ponds.get(2);
 
-                Cloud cloud0 = Clouds.get(0);
-                Cloud cloud1 = Clouds.get(1);
-                Cloud cloud2 = Clouds.get(2);
+                Cloud cloud0 = clouds.get(0);
+                Cloud cloud1 = clouds.get(1);
+                Cloud cloud2 = clouds.get(2);
                 cloud0.update(); cloud1.update(); cloud2.update();
 
                 heli.update();
-                dl0.update(cloud0, Ponds);
-                dl1.update(cloud1, Ponds);
-                dl2.update(cloud2, Ponds);
 
                 heli.rotate(heli.getMyRotation());
                 if (keysDown.contains(KeyCode.UP)){
-                    heli.throttle(true);
+                    if(frameCount % 2 == 0){
+                        heli.throttle(true);
+                        heli.fuel-=100;
+                    }
+
                 }
                 if (keysDown.contains(KeyCode.DOWN)){
-                    heli.throttle(false);
+                    if(frameCount % 2 == 0)
+                        heli.throttle(false);
                 }
                 if (keysDown.contains(KeyCode.LEFT)) {
                     heli.rotate(heli.getMyRotation() + 15);
@@ -570,44 +621,72 @@ class Game extends Pane{
                     }
                 }
                 if(keysDown.contains(KeyCode.R)){
-                    resetPressed = true;
+                    isResetPressed = true;
                 }
                 if(keysDown.contains(KeyCode.D)){
-                    if(frameCount % 8 == 0)
-                        invisiLine(dl0, dl1, dl2);
+                    if(frameCount % 6 == 0)
+                        invisiLine(dl0.lineList, dl1.lineList, dl2.lineList);
                 }
-                if ((frameCount % 8 == 0) && (resetPressed)) {
-                    init(root, Clouds, Ponds);
-                    resetPressed = false;
+                if(isVisible){
+                    dl0.update(cloud0, ponds);
+                    dl1.update(cloud1, ponds);
+                    dl2.update(cloud2, ponds);
+                }
+
+                if ((frameCount % 8 == 0) && (isResetPressed)) {
+                    init(root, clouds, ponds);
+                    isResetPressed = false;
                 }
 
                 if (frameCount % 60 == 0){
-                    pond0.beingSeeded(cloud0.seed);
-                    pond1.beingSeeded(cloud1.seed);
-                    pond2.beingSeeded(cloud2.seed);
+                    if(dl0.line0.getStroke() == Color.AQUAMARINE){
+                        pond0.beingSeeded(cloud0.seed);
+                    }
+                    if(dl0.line1.getStroke() == Color.AQUAMARINE){
+                        pond1.beingSeeded(cloud0.seed);
+                    }
+                    if(dl0.line2.getStroke() == Color.AQUAMARINE){
+                        pond2.beingSeeded(cloud0.seed);
+                    }
+                    if(dl1.line0.getStroke() == Color.AQUAMARINE){
+                        pond0.beingSeeded(cloud1.seed);
+                    }
+                    if(dl1.line1.getStroke() == Color.AQUAMARINE){
+                        pond1.beingSeeded(cloud1.seed);
+                    }
+                    if(dl1.line2.getStroke() == Color.AQUAMARINE){
+                        pond2.beingSeeded(cloud1.seed);
+                    }
+                    if(dl2.line0.getStroke() == Color.AQUAMARINE){
+                        pond0.beingSeeded(cloud2.seed);
+                    }
+                    if(dl2.line1.getStroke() == Color.AQUAMARINE){
+                        pond1.beingSeeded(cloud2.seed);
+                    }
+                    if(dl2.line2.getStroke() == Color.AQUAMARINE){
+                        pond2.beingSeeded(cloud2.seed);
+                    }
                     cloud0.deSeed();
                     cloud1.deSeed();
                     cloud2.deSeed();
                 }
-
-                //System.out.println(keysDown); // FOR TEST PURPOSES
+                if(!hasExecuted){
+                    wl.endGame(root, ponds, clouds, heli, keysDown);
+                }
 
                 if (old < 0) old = nano;
                 double delta = (nano - old) / conv_to_sec;
 
                 old = nano;
                 elapsedTime += delta;
-                double fps = (1 / delta);
-
                 if (frameCount % frameCount_avg == 0) {
-                    if(heli.ignition == true){
-                        heli.fuel -= 1;
+                    if (heli.ignition == true) {
+                        heli.fuel -= 10;
                         heli.text.setText(String.valueOf(heli.fuel));
                     }
                 }
                 frameCount++;
             }
-
         };
         loop.start();
     }
@@ -615,11 +694,12 @@ class Game extends Pane{
 
 public class GameApp extends Application {
     private static final int GAME_WIDTH = 800;
-
     private static final int GAME_HEIGHT = 800;//TODO set back to 800
-
+    Game game;
     @Override
     public void start(Stage primaryStage) {
+        WinOrLose wl = new WinOrLose();
+
         Pane root = new Pane();
         root.setScaleY(-1);
         Helicopter heli = new Helicopter();
@@ -649,11 +729,9 @@ public class GameApp extends Application {
 
         Background bg = new Background(root);
 
-
         root.getChildren().addAll(hp, pondPane, cloudPane, heli,linePane);
         heli.translate(400, 50);
         heli.pivot();
-
 
         // show the initial Scene for your application
         Scene scene = new Scene(root, GAME_WIDTH, GAME_HEIGHT, Color.BLACK);
@@ -682,14 +760,8 @@ public class GameApp extends Application {
                 keysdown.remove(event.getCode());
             }
         });
-
-
-
-        Game game = new Game(root, cloudList, pondList, /*dl,*/ keysdown);
-
-
+        game = new Game(root, cloudList, pondList, keysdown, wl);
     }
-
     public static void main(String[] args) {
         Application.launch();
     }
