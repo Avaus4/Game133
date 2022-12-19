@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Implemented wind, recycling clouds, distancelines, all with multiple panes and more">
+    <list default="true" id="464076d1-f173-4522-891f-74919e2e26dc" name="Changes" comment="Fixed the bounds for where clouds spawn, fixed the distance lines so that they only appear in range and implemented seeding based on the pond range. Also implemented the dialogue module and ending of the game.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/GameApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GameApp.java" afterDir="false" />
     </list>
@@ -43,6 +43,13 @@
     "settings.editor.selected.configurable": "preferences.sourceCode"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\austi\IdeaProjects\Game133" />
+      <recent name="C:\Users\austi\IdeaProjects\Game133\src" />
+      <recent name="C:\Users\austi\IdeaProjects\Game133\out" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -136,7 +143,14 @@
       <option name="project" value="LOCAL" />
       <updated>1671074529204</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Fixed the bounds for where clouds spawn, fixed the distance lines so that they only appear in range and implemented seeding based on the pond range. Also implemented the dialogue module and ending of the game.">
+      <created>1671340621765</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1671340621765</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -163,6 +177,7 @@
     <MESSAGE value="Made states of the helicopter/heliblades and made it so ignition only works while on helipad" />
     <MESSAGE value="Made movement of the clouds and started on the distance lines. put the ponds and the clouds into array list and their own panes as well" />
     <MESSAGE value="Implemented wind, recycling clouds, distancelines, all with multiple panes and more" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented wind, recycling clouds, distancelines, all with multiple panes and more" />
+    <MESSAGE value="Fixed the bounds for where clouds spawn, fixed the distance lines so that they only appear in range and implemented seeding based on the pond range. Also implemented the dialogue module and ending of the game." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed the bounds for where clouds spawn, fixed the distance lines so that they only appear in range and implemented seeding based on the pond range. Also implemented the dialogue module and ending of the game." />
   </component>
 </project>
